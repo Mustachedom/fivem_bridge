@@ -9,6 +9,7 @@ Bridge = Bridge or {}
 ---@field GetOfflinePlayer fun(identifier: string): (Player: table) Get an offline player object from their identifier. Call Player.Functions.Save() after making changes.
 ---@field GetPlayerLicense fun(src: number): (license: string) Get a player's license identifier from their server ID. Returns 'license:fxdk' if sv_fxdkMode is set to 1.
 ---@field GetPlayerSource fun(identifier: string): (src: number?) Get a player's server ID from their identifier.
+---@field GetPlayerIdentifier fun(src: number): (identifier: string?) Get a player's identifier (citizen ID) from their server ID.
 ---@field GetPlayerName fun(src: number|string): (name: { first: string, last: string }|nil) Get a player's first and last name.
 ---@field GetPlayerJobInfo fun(source: number|string): (job: JobInfo|nil) Get a player's job information.
 ---@field GetPlayerMoney fun(src: number|string, moneyType?: string): (money: MoneyInfo|number|nil) Get a player's money. Returns the full MoneyInfo table if moneyType is omitted, otherwise the amount for that type.
@@ -21,7 +22,15 @@ Bridge = Bridge or {}
 ---@field AddMoney fun(src: number|string, moneyType: string, amount: number): (success: boolean) Add money to a player's account.
 ---@field RemoveMoney fun(src: number|string, moneyType: string, amount: number): (success: boolean) Remove money from a player's account.
 ---@field CreateUsableItem fun(itemName: string, callback: fun(src: number, item: table)) Register an item as usable and bind a callback for when it's used.
- 
+---@field GetJobList fun(): (jobList: { [string]: JobInfo }) Get a list of all jobs available in the framework.
+---@field GetGangList fun(): (gangList: { [string]: GangInfo }) Get a list of all gangs available in the framework.
+---@field GetGangInfo fun(GangName: string): (gang: GangInfo|nil) Get a player's gang information.
+---@field GetJobInfo fun(JobName: string): (job: JobInfo|nil) Get a player's job information.
+---@field GetAllPlayers fun(): (players: { [number]: PlayerData }) Get a list of all online players and their PlayerData.
+---@field SetJob fun(src: number|string, jobName: string, jobGrade: number): (success: boolean) Set a player's job and grade.
+---@field SetGang fun(src: number|string, gangName: string, gangGrade: number): (success: boolean) Set a player's gang and grade.
+---@field ToggleDuty fun(src: number|string): (success: boolean) Toggle a player's duty status for their current job.
+
 ---@type FrameworkBridge
 Bridge.Framework = Bridge.Framework
 
@@ -38,6 +47,15 @@ Bridge.Framework = Bridge.Framework
 ---@field gradeLabel string Job grade label
 ---@field boss boolean Whether the player is a boss
 ---@field pay number Job grade payment
+
+---@class GangInfo
+---@field name string Gang name
+---@field label string Gang label
+---@field grade number Gang grade level
+---@field type string Gang type
+---@field gradeLabel string Gang grade label
+---@field boss boolean Whether the player is a boss
+---@field pay number Gang grade payment
 
 ---@class CharInfo
 ---@field account string Character account identifier

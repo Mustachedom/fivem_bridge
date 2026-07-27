@@ -1,7 +1,9 @@
 Bridge = Bridge or {}
 Bridge.Framework = {}
 local ESX = exports['es_extended']:getSharedObject()
+local esx_compat = exports['fivem_bridge']:require('esx_compatibility_config')
 Bridge.Framework.Script = "esx"
+
 
 function Bridge.Framework.GetPlayer(src)
     assert(type(src) == "number", "src must be a number")
@@ -60,11 +62,8 @@ function Bridge.Framework.GetPlayerName(src)
     end
     return nil
 end
-local esx_compat_jobs = {
-    police = 'leo',
-    ambulance = 'ems',
-    mechanic = 'mechanic',
-}
+
+
 function Bridge.Framework.GetPlayerJobInfo(source)
     local Player = getPlayer(source)
     if Player then
@@ -73,7 +72,7 @@ function Bridge.Framework.GetPlayerJobInfo(source)
             name = job.name,
             label = job.label,
             grade = job.grade.level,
-            type = job.name and esx_compat_jobs[job.name] or job.name,
+            type = job.name and esx_compat.jobTypes[job.name] or job.name,
             gradeLabel = job.grade_name,
             boss = job.grade_name == 'boss' or job.grade_name == 'owner',
             pay = job.grade_salary
@@ -129,7 +128,7 @@ end
 function Bridge.Framework.GetPlayerMetadata(src)
     local Player = getPlayer(src)
     if Player then
-        return Player.PlayerData.metadata
+        return  Player.getMeta()
     end
     return nil
 end
@@ -137,7 +136,7 @@ end
 function Bridge.Framework.GetPlayerSpecificMetadata(src, key)
     local Player = getPlayer(src)
     if Player then
-        return Player.PlayerData.metadata[key]
+        return Player.getMeta(key)
     end
     return nil
 end
@@ -148,7 +147,7 @@ function Bridge.Framework.GetJobDutyCount(jobName)
 end
 
 function Bridge.Framework.GetJobTypeDutyCount(jobType)
-    local job = esx_compat_jobs[jobType] or jobType
+    local job = esx_compat.jobTypes[jobType] or jobType
     return #ESX.ExtendedPlayers("job", {job})
 end
 

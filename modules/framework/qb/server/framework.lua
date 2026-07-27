@@ -37,12 +37,20 @@ function Bridge.Framework.GetPlayerSource(identifier)
     return nil
 end
 
+function Bridge.Framework.GetPlayerIdentifier(src)
+    local Player = Bridge.Framework.GetPlayer(src)
+    if Player then
+        return Player.PlayerData.citizenid
+    end
+    return nil
+end
+
 local function getPlayer(src)
     if type(src) == "number" then
-        return Bridge.Framework.GetPlayer(src)
+        return Bridge.Framework.GetPlayer(src), true
     elseif type(src) == "string" then
         local online = Bridge.Framework.GetPlayerByIdentifier(src)
-        if online then return online end
+        if online then return online, true end
         return Bridge.Framework.GetOfflinePlayer(src), false
     end
     return nil
@@ -73,6 +81,22 @@ function Bridge.Framework.GetPlayerJobInfo(source)
             gradeLabel = job.grade.name,
             boss = job.isboss,
             pay = job.grade.payment
+        }
+    end
+    return nil
+end
+
+function Bridge.Framework.GetPlayerGangInfo(source)
+    local Player = getPlayer(source)
+    if Player then
+        local gang = Player.PlayerData.gang
+        return {
+            name = gang.name,
+            label = gang.label,
+            grade = gang.grade.level,
+            type = gang.type,
+            gradeLabel = gang.grade.name,
+            boss = gang.isboss,
         }
     end
     return nil
@@ -171,4 +195,85 @@ end
 
 function Bridge.Framework.CreateUsableItem(itemName, callback)
     QBCore:CreateUseableItem(itemName, callback)
+end
+
+local compatJob, compatGang = {}, {}
+CreateThread(function()
+    local Jobs, Gangs = QBCore:GetShared("Jobs"), QBCore:GetShared("Gangs")
+    for jobName, jobData in pairs(Jobs) do
+        compatJob[jobName] = {
+            name = jobData.name,
+            label = jobData.label,
+            grades = jobData.grades,
+            type = jobData.type
+        }
+    end
+    for gangName, gangData in pairs(Gangs) do
+        compatGang[gangName] = {
+            name = gangData.name,
+            label = gangData.label,
+            grades = gangData.grades,
+            type = gangData.type
+        }
+    end
+end)
+
+function Bridge.Framework.GetJobList()
+    return compatJob
+end
+
+function Bridge.Framework.GetGangList()
+    return compatGang
+end
+
+function Bridge.Framework.GetJobInfo(jobName)
+    return compatJob[jobName]
+end
+
+function Bridge.Framework.GetGangInfo(gangName)
+    return compatGang[gangName]
+end
+
+function Bridge.Framework.GetAllPlayers()
+    local players = {}
+    for _, playerId in pairs(QBCore:GetPlayers()) do
+        table.insert(players, playerId)
+    end
+    return players
+end
+
+function Bridge.Framework.SetJob(src, jobName, jobGrade)
+    local Player, online = getPlayer(src)
+    if Player then
+        Player.Functions.SetJob(jobName, tostring(jobGrade))
+        if not online then
+            Player.Functions.Save()
+        end
+        return true
+    end
+    return false
+end
+
+function Bridge.Framework.SetGang(src, gangName, gangGrade)
+    local Player, online = getPlayer(src)
+    if Player then
+        Player.Functions.SetGang(gangName, tostring(gangGrade))
+        if not online then
+            Player.Functions.Save()
+        end
+        return true
+    end
+    return false
+end
+
+function Bridge.Framework.ToggleDuty(src)
+    local Player, online = getPlayer(src)
+    if Player then
+        Player.Functions.SetJobDuty(not Player.PlayerData.job.onduty)
+        if not online then
+            Player.Functions.Save()
+        end
+        return true
+    end
+    return false
 end
