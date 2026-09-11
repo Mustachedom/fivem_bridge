@@ -1,8 +1,8 @@
 Bridge = Bridge or {}
 Bridge.Notify = {}
-print("Notify module initialized.")
-function Bridge.Notify.Send(src, title, message, type, time)
+function Bridge.Notify.Send(src, data)
     assert(src, "Source is required for sending a notification.")
-    assert(message, "Message is required for sending a notification.")
-    TriggerClientEvent('okokNotify:Alert', src, title, message, time or 4000, type or 'info', false)
+    assert(type(data) == "table", "Data must be a table.")
+    assert(data.message, "Message is required for sending a notification.")
+    TriggerClientEvent('okokNotify:Alert', src, data.title or "Notification", data.message, data.time or 4000, data.type or 'info', false)
 end
